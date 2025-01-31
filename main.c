@@ -1,13 +1,20 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
+#include "hardware/timer.h"
 
 const uint pino_led_vermelho = 11; // Define o pino do led vermelho
 const uint pino_led_azul = 12; // Define o pino do led azul
 const uint pino_led_verde = 13; // Define o pino do led verde
 
-typedef enum CORES_SEMAFARO {VERMELHO, AMARELO, VERDE} CORES_SEMAFARO;
+
+typedef enum CORES_SEMAFARO {VERMELHO, AMARELO, VERDE} CORES_SEMAFARO; // Enumeração para as cores do semáforo
+
+
+static volatile CORES_SEMAFARO cor_semaforo = VERMELHO; // Variável para armazenar a cor atual do semáforo
+
 
 void setup_led(uint pino); // Protótipo da função para inicializar um pino de led
+bool repeating_timer_callback(struct repeating_timer *t);
 
 int main()
 {
@@ -16,6 +23,11 @@ int main()
     setup_led(pino_led_vermelho); // Inicializa o led vermelho
     setup_led(pino_led_azul); // Inicializa o led azul
     setup_led(pino_led_verde); // Inicializa o led verde
+
+
+    struct repeating_timer timer; // Cria uma estrutura para o timer
+
+    add_repeating_timer_ms(3000, repeating_timer_callback, NULL, &timer); // Inicializa o timer
 
     while (true) {
         printf("Hello, world!\n");
@@ -31,4 +43,35 @@ void setup_led(uint pino)
     gpio_init(pino); // Inicializa o pino
     gpio_set_dir(pino, GPIO_OUT); // Define o pino como saída
     gpio_put(pino, false);  // Desliga o led
+}
+
+
+/*
+* Função de callback para o timer
+*/
+bool repeating_timer_callback(struct repeating_timer *t) {
+
+    switch (cor_semaforo)
+    {
+        case VERMELHO:
+            gpio_put(pino_led_vermelho, true); // Liga o led vermelho
+            gpio_put(pino_led_azul, false); // Desliga o led azul
+            gpio_put(pino_led_verde, false); // Desliga o led verde
+            cor_semaforo = AMARELO;
+            break;
+        case AMARELO:
+            gpio_put(pino_led_vermelho, false); // Desliga o led vermelho
+            gpio_put(pino_led_azul, true); // Liga o led azul
+            gpio_put(pino_led_verde, true); // Desliga o led verde
+            cor_semaforo = VERDE;
+            break;
+        case VERDE:
+            gpio_put(pino_led_vermelho, false); // Desliga o led vermelho
+            gpio_put(pino_led_azul, false); // Desliga o led azul
+            gpio_put(pino_led_verde, true); // Liga o led verde
+            cor_semaforo = VERMELHO;
+            break;
+    }
+
+    return true;
 }
