@@ -5,6 +5,8 @@ const uint pino_led_vermelho = 11; // Define o pino do led vermelho
 const uint pino_led_azul = 12; // Define o pino do led azul
 const uint pino_led_verde = 13; // Define o pino do led verde
 
+typedef enum CORES_SEMAFARO {VERMELHO, AMARELO, VERDE} CORES_SEMAFARO;
+
 void setup_led(uint pino); // Protótipo da função para inicializar um pino de led
 
 int main()
