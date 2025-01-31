@@ -1,0 +1,4 @@
+[wokwi]
+version = 1
+firmware = 'build/Semafaro.uf2'
+elf = 'build/Semafaro.elf'
